@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="description" content="GymWorkout - Track your workouts, build routines, and monitor your fitness progress">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GymWorkout">
+  <meta name="theme-color" content="#3b82f6">
+  <title>GymWorkout - Fitness Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <h1>GymWorkout</h1>
+      </div>
+      <nav class="tabs" role="tablist" aria-label="Main Navigation">
+        <button class="tab" role="tab" aria-selected="true" data-tab="start">Start</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="build">Build</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="history">History</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="progress">Progress</button>
+      </nav>
+    </header>
+
+    <!-- START VIEW -->
+    <section id="view-start" role="tabpanel" aria-labelledby="tab-start">
+      <div class="grid">
+        <div class="card">
+          <div class="section">
+            <h3>This Week</h3>
+            <div class="row">
+              <div id="weekly-count" class="weekly-count">0 workouts</div>
+              <span class="pill" id="last-workout-pill">No recent workout</span>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>Progress</h3>
+            <div class="progress">
+              <div id="progress-bar" class="progress-fill"></div>
+            </div>
+            <div class="muted progress-label" id="progress-label">0% done</div>
+          </div>
+
+          <div class="row">
+            <button class="btn btn-primary" id="btn-start-quick">Start Quick Workout</button>
+            <button class="btn" id="btn-open-build">Create a Routine</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section">
+            <h3>Rest Timer</h3>
+            <div class="row rest-timer-controls">
+              <div class="stepper" aria-label="Rest seconds">
+                <button type="button" data-delta="-15" aria-label="Decrease rest time">−</button>
+                <output id="rest-output">90s</output>
+                <button type="button" data-delta="15" aria-label="Increase rest time">＋</button>
+              </div>
+              <button class="btn" id="btn-rest-start" type="button">Start</button>
+              <button class="btn btn-ghost" id="btn-rest-stop" type="button">Stop</button>
+              <div class="pill" id="rest-remaining">Stopped</div>
+            </div>
+          </div>
+          <div class="muted tip-text">Tip: finishing a set can auto-start rest.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BUILD VIEW -->
+    <section id="view-build" role="tabpanel" aria-labelledby="tab-build" hidden>
+      <div class="card">
+        <div class="section">
+          <h3>Title</h3>
+          <input 
+            id="routine-title" 
+            type="text" 
+            value="Custom Routine" 
+            class="input-field"
+            placeholder="Enter routine name"
+            aria-label="Routine title">
+        </div>
+
+        <div id="catalog" class="catalog-container"></div>
+
+        <div class="space"></div>
+        <button class="btn btn-primary btn-block" id="btn-build-start" disabled type="button">Start</button>
+      </div>
+    </section>
+
+    <!-- HISTORY VIEW -->
+    <section id="view-history" role="tabpanel" aria-labelledby="tab-history" hidden>
+      <div class="card" id="history-list"></div>
+    </section>
+
+    <!-- PROGRESS VIEW -->
+    <section id="view-progress" role="tabpanel" aria-labelledby="tab-progress" hidden>
+      <div class="card">
+        <div class="section">
+          <h3>Weekly Improvement Report</h3>
+          <div class="muted" style="margin-bottom: 16px">Compare this week's performance with previous weeks</div>
+          <div id="progress-report"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- QUICK SPLIT MODAL -->
+  <div class="modal" id="quick-modal" aria-modal="true" role="dialog" aria-labelledby="quick-modal-title">
+    <div class="sheet">
+      <header class="row">
+        <h2 id="quick-modal-title" class="modal-title">Choose Combination</h2>
+        <button class="btn btn-ghost" id="btn-quick-close" type="button" aria-label="Close modal">Close</button>
+      </header>
+      <div class="section">
+      <div class="grid grid-auto-fit">
+        <button class="btn btn-primary quick-option" data-split="chest_triceps" type="button">
+          1: Chest + Triceps
+        </button>
+        <button class="btn btn-primary quick-option" data-split="back_biceps" type="button">
+          2: Back + Biceps (Deadlift Focus)
+        </button>
+        <button class="btn btn-primary quick-option" data-split="shoulders_delts" type="button">
+          3: Shoulders + Delts
+        </button>
+        <button class="btn btn-primary quick-option" data-split="legs" type="button">
+          4: Legs (Deadlift Focus)
+        </button>
+        <button class="btn btn-primary quick-option" data-split="fullbody" type="button">
+          5: Full Body / Functional
+        </button>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SESSION MODAL -->
+  <div class="modal" id="session-modal" aria-modal="true" role="dialog" aria-labelledby="session-modal-title">
+    <div class="sheet">
+      <header class="row">
+        <div>
+          <div class="muted" id="session-date"></div>
+          <h2 id="session-title" class="modal-title">Workout</h2>
+        </div>
+        <div class="row session-actions">
+          <button class="btn btn-ghost" id="btn-session-cancel" type="button">Cancel</button>
+          <button class="btn btn-primary" id="btn-session-finish" disabled type="button">Finish</button>
+        </div>
+      </header>
+
+      <div class="section">
+        <div class="row session-progress-row">
+          <div class="progress session-progress">
+            <div id="session-progress" class="progress-fill"></div>
+          </div>
+          <span class="muted" id="session-progress-label">0% done</span>
+        </div>
+      </div>
+
+      <div id="session-items" class="session-items"></div>
+
+      <div class="section">
+        <h3>Notes</h3>
+        <textarea 
+          id="session-notes" 
+          rows="3" 
+          class="textarea-field"
+          placeholder="Add notes about your workout..."
+          aria-label="Workout notes"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAILS MODAL -->
+  <div class="modal" id="details-modal" aria-modal="true" role="dialog" aria-labelledby="details-modal-title">
+    <div class="sheet">
+      <header class="row">
+        <div>
+          <div class="muted" id="details-date"></div>
+          <h2 id="details-title" class="modal-title">Workout Details</h2>
+        </div>
+        <button class="btn btn-ghost" id="btn-details-close" type="button" aria-label="Close modal">Close</button>
+      </header>
+      <div id="details-body" class="details-body"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
